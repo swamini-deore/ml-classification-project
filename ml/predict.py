@@ -1,54 +1,82 @@
-# This file evaluates the saved model on test data
+# This file loads saved model and makes predictions on new input data
 
-import pickle  # load saved model
+import pickle  # load saved model, scaler, selector
 import numpy as np  # numerical operations
-from sklearn.metrics import (
-    accuracy_score,       # overall accuracy
-    precision_score,      # precision score
-    recall_score,         # recall score
-    f1_score,             # f1 score
-    confusion_matrix,     # confusion matrix
-    roc_auc_score         # roc auc score
-)
+import pandas as pd  # data manipulation
 from dotenv import load_dotenv  # load env variables
 import os  # access env variables
-from preprocess import load_transformed_data, preprocess  # import preprocess functions
-from sklearn.model_selection import train_test_split  # split data
 
 load_dotenv()  # load .env file
 
-def evaluate():
+def load_artifacts():
     # load saved model from disk
     with open(os.getenv('MODEL_PATH'), 'rb') as f:
         model = pickle.load(f)  # deserialize model
-    print("Model loaded successfully")
 
-    df = load_transformed_data()  # load transformed data from mysql
-    X, y = preprocess(df)  # apply preprocessing
+    # load saved scaler from disk
+    with open('./ml/scaler.pkl', 'rb') as f:
+        scaler = pickle.load(f)  # deserialize scaler
 
-    # same split as train.py to get same test set
-    _, X_test, _, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    # load saved selector from disk
+    with open('./ml/selector.pkl', 'rb') as f:
+        selector = pickle.load(f)  # deserialize selector
 
-    y_pred = model.predict(X_test)  # predict on test data
-    y_prob = model.predict_proba(X_test)[:, 1]  # predict probabilities for roc auc
+    # load selected feature names
+    with open('./ml/selected_features.pkl', 'rb') as f:
+        selected_features = pickle.load(f)  # deserialize feature names
 
-    # calculate all metrics
-    acc = accuracy_score(y_test, y_pred)          # accuracy
-    pre = precision_score(y_test, y_pred)          # precision
-    rec = recall_score(y_test, y_pred)             # recall
-    f1  = f1_score(y_test, y_pred)                 # f1 score
-    auc = roc_auc_score(y_test, y_prob)            # roc auc
-    cm  = confusion_matrix(y_test, y_pred)         # confusion matrix
+    return model, scaler, selector, selected_features  # return all artifacts
 
-    # print all metrics
-    print(f"Accuracy  : {acc:.4f}")
-    print(f"Precision : {pre:.4f}")
-    print(f"Recall    : {rec:.4f}")
-    print(f"F1 Score  : {f1:.4f}")
-    print(f"ROC AUC   : {auc:.4f}")
-    print(f"Confusion Matrix:\n{cm}")
 
-    return acc, pre, rec, f1, auc  # return metrics for mlflow tracking
+def predict(input_data: dict):
+    model, scaler, selector, selected_features = load_artifacts()  # load all artifacts
+
+    # convert input dict to dataframe
+    df = pd.DataFrame([input_data])
+
+    # scale ALL 17 features first (same as training)
+    df_scaled = scaler.transform(df)
+
+    # then select top 10 features using saved selector
+    df_selected = selector.transform(df_scaled)
+
+    # make prediction
+    prediction = model.predict(df_selected)[0]  # 0 or 1
+    probability = model.predict_proba(df_selected)[0][1]  # probability of Revenue=1
+
+    result = {
+        "prediction": int(prediction),
+        "probability": round(float(probability), 4),
+        "message": "Will Purchase" if prediction == 1 else "Will Not Purchase"
+    }
+
+    return result
+
+
+
+
 
 if __name__ == "__main__":
-    evaluate()  # run evaluation
+    # sample input — all 17 features (Revenue excluded as it is target)
+    sample_input = {
+        "Administrative": 0,
+        "Administrative_Duration": 0.0,
+        "Informational": 0,
+        "Informational_Duration": 0.0,
+        "ProductRelated": 1,
+        "ProductRelated_Duration": 0.0,
+        "BounceRates": 0.2,
+        "ExitRates": 0.2,
+        "PageValues": 0.0,
+        "SpecialDay": 0.0,
+        "Month": 2,
+        "OperatingSystems": 1,
+        "Browser": 1,
+        "Region": 1,
+        "TrafficType": 1,
+        "VisitorType": 2,
+        "Weekend": 0
+    }
+
+    result = predict(sample_input)  # run prediction
+    print(result)  # print result
