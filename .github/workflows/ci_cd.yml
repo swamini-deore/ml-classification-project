@@ -89,7 +89,7 @@ jobs:
 
   build-and-push:
     name: Build and Push Docker Image  # job name
-    runs-on: ubuntu-latest  # run on ubuntu
+    runs-on: ubuntu-latest  # run on ubuntu 
     needs: test  # run only if test job passes
 
     steps:
