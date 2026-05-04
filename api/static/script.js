@@ -31,7 +31,7 @@ document.getElementById('prediction-form').addEventListener('submit', async func
 
     try {
         // call predict API endpoint
-        const response = await fetch('/predict', {
+        const response = await fetch('https://ml-classification-project-8fr3.onrender.com/predict', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
