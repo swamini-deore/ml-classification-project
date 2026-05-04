@@ -18,7 +18,7 @@ jobs:
         image: mysql:8.0  # mysql version
         env:
           MYSQL_ROOT_PASSWORD: 123456789 # root password
-          MYSQL_DATABASE: shoppers_db1  # database name
+          MYSQL_DATABASE: shoppers_db # database name
         ports:
           - 3306:3306  # expose mysql port
         options: >-
@@ -58,7 +58,7 @@ jobs:
           DB_PORT: 3306  # mysql port
           DB_USER: root  # mysql user
           DB_PASSWORD: 123456789  # mysql password
-          DB_NAME: shoppers_db1 # mysql database
+          DB_NAME: shoppers_db # mysql database
           PG_HOST: 127.0.0.1  # postgresql host
           PG_PORT: 5432  # postgresql port
           PG_USER: postgres  # postgresql user
@@ -77,7 +77,7 @@ jobs:
           DB_PORT: 3306  # mysql port
           DB_USER: root  # mysql user
           DB_PASSWORD: 123456789  # mysql password
-          DB_NAME: shoppers_db1  # mysql database
+          DB_NAME: shoppers_db # mysql database
           PG_HOST: 127.0.0.1  # postgresql host
           PG_PORT: 5432  # postgresql port
           PG_USER: postgres  # postgresql user
