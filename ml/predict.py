@@ -10,11 +10,8 @@ load_dotenv()  # load .env file
 
 def load_artifacts():
     # load saved model from disk
-    base_dir = os.path.dirname(__file__)
-
-with open(os.path.join(base_dir, 'model.pkl'), 'rb') as f:
-    model = pickle.load(f) # deserialize model
-
+    with open(os.getenv('MODEL_PATH'), 'rb') as f:
+        model = pickle.load(f)  # deserialize model
 
     # load saved scaler from disk
     with open('./ml/scaler.pkl', 'rb') as f:
