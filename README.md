@@ -143,16 +143,27 @@ python monitoring/drift_report.py
 
 
 DB_HOST=localhost
+
 DB_PORT=3306
+
 DB_USER=root
+
 DB_PASSWORD=your_password
+
 DB_NAME=shoppers_db
+
 PG_HOST=localhost
+
 PG_PORT=5432
+
 PG_USER=postgres
+
 PG_PASSWORD=your_password
+
 PG_NAME=shoppers_warehouse
+
 MLFLOW_TRACKING_URI=./mlruns
+
 MODEL_PATH=./ml/model.pkl
 
 
